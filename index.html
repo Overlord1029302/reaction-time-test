@@ -1,0 +1,119 @@
+<html>
+    <head>
+        <title>Reaction Time Test</title>
+        <style>
+            body {
+                margin:0;
+                font-family: 'Poppins',Arial,sans-serif;
+                text-align: center;
+                color: white;
+            }
+            .screen {
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                justify-content:center ;
+                align-items: center;
+                text-align: center;
+                font-size: 2rem;
+                cursor: pointer;
+                transition: background-color 0.3s ease, transform 0.2s ease;
+            }
+            .blue {
+                background-color: #2b87d2;
+            }
+            .red {
+                background-color: #FF4136;
+            }
+            .green {
+                background-color: #2ecc40;
+            }
+            .screen:hover {
+                transform: scale(1.02);
+            }
+            #message {
+                max-width: 80%;
+                line-height: 1.5;
+            }
+            .highlight {
+                font-weight: bold;
+                text-shadow: 0px 0px 8px rgba(255,255,255,0.7);
+            }
+            .reaction-time {
+                font-size: 3rem;
+                font-weight: bold;
+                margin-top: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="screen" class="screen blue">
+            <div id="message">Click to<span class="highlight">start </span>the Reaction Time Test</div>
+        </div>
+
+        <script>
+            const screen = document.getElementById("screen")
+            const message = document.getElementById("message")
+
+            let startTime = 0;
+            let timeout = null;
+            let gameState = "start";
+
+            const startWait = () => {
+                gameState = "wait"
+                screen.className = "screen red"
+                message.textContent = "Get Ready... Wait for green signal!"
+                timeout = setTimeout(() => {
+                    startGreen ();
+                }, Math.random()*9000+1000);
+            };
+
+
+            const startGreen = () => {
+                gameState = "green";
+                screen.className = "screen green";
+                message.textContent = "GO! Click Now!"
+                startTime = performance.now();
+            }
+
+            const showResults = (reactionTime) => {
+                screen.className = "screen blue";
+                message.innerHTML = `
+                   Your Reaction Time is
+                   <div class="reaction-time"><span id="highlight"> ${reactionTime} ms</span></div>
+                   Click to try again!
+               `;
+               gameState = "results";
+
+            };
+
+            const handleClick = () => {
+                if (gameState === "start") {
+                    startWait();
+                } else if (gameState === "wait") {
+                    clearTimeout(timeout);
+                    screen.className = "screen blue";
+                    message.textContent = "You clicked too early! Restarting...";
+                    setTimeout(startWait, 1000);
+                    gameState = 'too-early';
+                } else if (gameState==="green") {
+                    const reactionTime = Math.round(performance.now() - startTime);
+                    showResults(reactionTime);
+                } else if (gameState==="results" || gameState === "too-early"){
+                    startWait();
+                }
+
+            };
+
+            screen.addEventListener("click",handleClick);
+
+            const resetToStart = () => {
+                gameState = "start";
+                screen.className = "screen blue";
+                message.innerHTML = "Click to <span class='highlight'>start</span> the Reaction Time Test";
+            }
+
+            resetToStart();
+        </script>
+    </body>
+</html>
